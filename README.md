@@ -1,22 +1,38 @@
+// ---- README (quick start) ----
+
 # Baileys WhatsApp Service
 
-```bash
-# clone repo & enter
-npm install
-cp .env.example .env    # edit values
-node server.js          # scan the QR code once
+Now exposes a **/qr** endpoint so you can scan from anywhere.
 
-# build & run in Docker
+```bash
+npm install
+cp .env.example .env  # edit values
+node server.js        # open http://localhost:3000/qr and scan
+```
+
+### Docker
+
+```bash
 docker build -t baileys-wa .
 docker run -d --name wa \
   -p 3000:3000 \
-  -v $PWD/auth:/app/auth \  # persist login
+  -v $PWD/auth:/app/auth \
   --env-file .env \
   baileys-wa
 ```
 
+### Docker compose
+
+```bash
+docker compose up -d
+```
+
+Then browse to `http://<host>:3000/qr`.
+
 **Endpoints**
 
-- `POST /send-message` → `{ "to": "573001234567", "text": "Hola 🥳" }`
+- `GET  /qr` – PNG QR to log in
+- `POST /send-message` – `{ "to": "573001234567", "text": "Hola 🥳" }`
+- `GET  /health` – quick health‑check
 
-Incoming messages are forwarded to the URL in `WEBHOOK_URL`.
+Incoming messages are forwarded to `N8N_WEBHOOK_URL`. Incoming QR codes show for 30–60&nbsp;s – refresh if expired.

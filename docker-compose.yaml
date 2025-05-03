@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  wa:
+    build: .
+    container_name: wa
+    ports: [ "3000:3000" ]
+    volumes:
+      - ./auth:/app/auth
+    env_file: .env
