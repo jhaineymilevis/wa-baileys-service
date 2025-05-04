@@ -27,8 +27,8 @@ export default async function initBaileys() {
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: true,
-    // connectTimeoutMs: 40_000,
-    // keepAliveIntervalMs: 10_000,
+    connectTimeoutMs: 40_000,
+    keepAliveIntervalMs: 10_000,
   });
 
   /* -------- QR GENERADO -------- */
