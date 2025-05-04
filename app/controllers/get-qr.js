@@ -1,9 +1,11 @@
+import { latestQRImg } from "../state.js";
+
 /**
  * Generates a QR code from the given text.
  * @param {string} text - The text to encode in the QR code.
  * @returns {Promise<string>} - A promise that resolves to the QR code as a data URL.
  */
-const getQR = async (latestQRImg) => {
+const getQR = async (req, res) => {
   try {
     if (!latestQRImg) {
       return res

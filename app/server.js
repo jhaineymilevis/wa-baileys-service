@@ -35,7 +35,7 @@ async function createServer() {
 
   // expose the QR so remote users can scan it in a browser
   app.get("/qr", (req, res) => {
-    getQR(latestQRImg);
+    getQR(req, res);
   });
 
   // simple health‑check
