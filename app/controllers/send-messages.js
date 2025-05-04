@@ -1,9 +1,12 @@
+import { currentSocket } from "../state.js";
+
 /**
  * Sends a WhatsApp message to a specific number.
  * @param {string} phoneNumber - The recipient's phone number in international format (e.g., '1234567890@s.whatsapp.net').
  * @param {string} message - The message to send.
  */
-async function sendMessage(sock, req, res) {
+async function sendMessage(req, res) {
+  let sock = currentSocket;
   const { to, text, image } = req.body || {};
 
   if (!to || !text)

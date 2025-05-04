@@ -1,4 +1,4 @@
-import { setLatestQRImg } from "../state.js";
+import { setCurrentSocket, setLatestQRImg } from "../state.js";
 
 import fetch from "node-fetch";
 import { Boom } from "@hapi/boom";
@@ -36,7 +36,8 @@ async function initBaileys() {
         console.log("connection closed. reconnect =", shouldReconnect);
         if (shouldReconnect) {
           console.log("🕐 Reconectando socket…");
-          currentSocket = await initBaileys(); // NO vuelvas a llamar createServer
+          let sock = await initBaileys(); // NO vuelvas a llamar createServer
+          setCurrentSocket(sock); // 1. guarda el socket en el estado
         } else {
           console.log("Sesión cerrada, hay que re‑escanear QR");
         }

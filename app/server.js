@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import initBaileys from "./services/baileys.js";
 import sendMessage from "./controllers/send-messages.js";
 import getQR from "./controllers/get-qr.js";
+import { setCurrentSocket } from "./state.js";
 
 dotenv.config();
 
@@ -11,10 +12,10 @@ export const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 const PORT = process.env.PORT || 3000;
 
 let httpServer; // ⬅️ fuera de cualquier función
-let currentSocket; // para ir reemplazando la conexión Baileys
 
 async function start() {
-  currentSocket = await initBaileys();
+  let socket = await initBaileys();
+  setCurrentSocket(socket); // 1. guarda el socket en el estado
   if (!httpServer) {
     httpServer = await createServer(); // 👉 solo la primera vez
     console.log("📞 REST API ready on port", PORT);
@@ -29,7 +30,7 @@ async function createServer() {
 
   // send message endpoint
   app.post("/send-message", async (req, res) => {
-    sendMessage(currentSocket, req, res);
+    sendMessage(req, res);
   });
 
   // expose the QR so remote users can scan it in a browser
