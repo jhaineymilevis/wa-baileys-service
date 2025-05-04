@@ -22,7 +22,7 @@ let backoff = 1_000; // arranca en 1 s
    FUNCIÓN PRINCIPAL
 ——————————————————————————————— */
 export default async function initBaileys() {
-  const { state, saveCreds } = await useMultiFileAuthState("auth");
+  const { state, saveCreds } = await useMultiFileAuthState("data/auth");
 
   const sock = makeWASocket({
     auth: state,

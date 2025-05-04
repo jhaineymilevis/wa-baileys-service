@@ -36,3 +36,13 @@ Then browse to `http://<host>:3000/qr`.
 - `GET  /health` – quick health‑check
 
 Incoming messages are forwarded to `N8N_WEBHOOK_URL`. Incoming QR codes show for 30–60&nbsp;s – refresh if expired.
+
+## rUn with Railway
+
+# montar un volumen en railway
+
+railway volume add -m /data
+
+# run
+
+railway up
