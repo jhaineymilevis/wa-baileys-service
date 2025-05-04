@@ -36,7 +36,7 @@ export default async function initBaileys() {
   sock.ev.on(
     "connection.update",
     async ({ connection, lastDisconnect, qr }) => {
-      console.log("connection", connection);
+      console.log("connection status", connection);
 
       if (qr) {
         const latestQRImg = await QRCode.toDataURL(qr);
