@@ -1,92 +1,132 @@
-import { setCurrentSocket, setLatestQRImg } from "../state.js";
-
+// initBaileys.js
 import fetch from "node-fetch";
-import { Boom } from "@hapi/boom";
 import QRCode from "qrcode";
+import { Boom } from "@hapi/boom";
 import {
   makeWASocket,
   DisconnectReason,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
+
+import { setCurrentSocket, setLatestQRImg } from "../state.js";
 import { N8N_WEBHOOK_URL } from "../server.js";
 
-async function initBaileys() {
+/* ————————————————————————————————
+   AJUSTES RE‑INTENTOS
+——————————————————————————————— */
+const MAX_BACKOFF = 60_000; // tope 1 min
+let backoff = 1_000; // arranca en 1 s
+
+async function waitForNetwork() {
+  while (true) {
+    try {
+      await fetch("https://clients3.google.com/generate_204", {
+        timeout: 3000,
+      });
+      return;
+    } catch {
+      console.log("🌐 Sin datos… re‑chequeo en 5 s");
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+  }
+}
+
+/* ————————————————————————————————
+   FUNCIÓN PRINCIPAL
+——————————————————————————————— */
+export default async function initBaileys() {
   const { state, saveCreds } = await useMultiFileAuthState("auth");
 
   const sock = makeWASocket({
-    printQRInTerminal: true,
     auth: state,
+    printQRInTerminal: true,
+    connectTimeoutMs: 40_000,
+    keepAliveIntervalMs: 10_000,
   });
 
-  // Baileys connection lifecycle
+  /* -------- QR GENERADO -------- */
   sock.ev.on(
     "connection.update",
     async ({ connection, lastDisconnect, qr }) => {
       if (qr) {
-        let latestQRImg = await QRCode.toDataURL(qr);
+        const latestQRImg = await QRCode.toDataURL(qr);
         setLatestQRImg(latestQRImg);
-        console.log("🔑 New QR code generated – browse /qr to scan");
+        console.log("🔑 QR nuevo – abre /qr para escanear");
       }
 
-      if (connection === "close") {
-        const boomErr = /** @type {Boom | undefined} */ (lastDisconnect?.error);
-        const shouldReconnect =
-          boomErr?.output?.statusCode !== DisconnectReason.loggedOut;
-        const reason = lastDisconnect?.error?.output?.statusCode;
-        console.log("connection closed. reasson =", reason);
-        if (shouldReconnect) {
-          console.log("🕐 Reconectando socket…");
-          let sock = await initBaileys(); // NO vuelvas a llamar createServer
-          setCurrentSocket(sock); // 1. guarda el socket en el estado
-        } else {
-          console.log("Sesión cerrada, hay que re‑escanear QR");
-        }
-      }
+      /* -------- CONEXIÓN ABIERTA -------- */
       if (connection === "open") {
-        console.log("✅ WhatsApp connection ready");
-
+        console.log("✅ WhatsApp conectado");
+        backoff = 1_000; // reset back‑off
         setLatestQRImg(null);
+      }
+
+      /* -------- CONEXIÓN CERRADA -------- */
+      if (connection === "close") {
+        const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+        const isLoggedOut = reason === DisconnectReason.loggedOut;
+        const timedOut =
+          reason === DisconnectReason.timedOut ||
+          reason === DisconnectReason.connectionClosed ||
+          reason === DisconnectReason.connectionLost;
+
+        console.log(
+          "🔌 Conexión cerrada. Razón =",
+          DisconnectReason[reason] || reason
+        );
+
+        if (isLoggedOut) {
+          console.log("Sesión cerrada → re‑escanea QR");
+          return;
+        }
+
+        if (timedOut) {
+          console.log("🕐 Esperando red y reintentando…");
+          await waitForNetwork();
+          await new Promise((r) => setTimeout(r, backoff));
+          backoff = Math.min(backoff * 2, MAX_BACKOFF);
+
+          try {
+            sock.ws.close();
+          } catch {}
+          const newSock = await initBaileys();
+          setCurrentSocket(newSock);
+        }
       }
     }
   );
 
+  /* -------- GUARDA CREDENCIALES -------- */
   sock.ev.on("creds.update", saveCreds);
 
-  // forward every incoming text to n8n
+  /* -------- MENSAJES ENTRANTES -------- */
   sock.ev.on("messages.upsert", async ({ messages }) => {
-    console.log("New message received:", messages);
-
     const msg = messages?.[0];
-
     if (
       !msg?.key?.fromMe &&
       (msg.message?.conversation || msg.message?.extendedTextMessage)
     ) {
-      try {
-        console.log(
-          "text:",
-          msg.message.conversation
-            ? msg.message.conversation
-            : msg.message?.extendedTextMessage?.text
-        );
+      const text =
+        msg.message.conversation ?? msg.message.extendedTextMessage?.text;
 
+      console.log("📥 Texto recibido:", text);
+
+      try {
         await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            from: msg.key.remoteJid,
-            text: msg.message.conversation
-              ? msg.message.conversation
-              : msg.message?.extendedTextMessage?.text,
-          }),
+          body: JSON.stringify({ from: msg.key.remoteJid, text }),
         });
       } catch (err) {
-        console.error("Error sending to n8n webhook:", err);
+        console.error("Error enviando al webhook n8n:", err);
       }
     }
   });
 
+  /* -------- LIMPIEZA AL CERRAR PROCESO -------- */
+  const closeSocket = () => sock?.ws?.close();
+  process.once("SIGINT", closeSocket);
+  process.once("SIGTERM", closeSocket);
+
   return sock;
 }
-
-export default initBaileys;
