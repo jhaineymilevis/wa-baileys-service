@@ -27,14 +27,16 @@ export default async function initBaileys() {
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: true,
-    connectTimeoutMs: 40_000,
-    keepAliveIntervalMs: 10_000,
+    // connectTimeoutMs: 40_000,
+    // keepAliveIntervalMs: 10_000,
   });
 
   /* -------- QR GENERADO -------- */
   sock.ev.on(
     "connection.update",
     async ({ connection, lastDisconnect, qr }) => {
+      console.log("connection", connection);
+
       if (qr) {
         const latestQRImg = await QRCode.toDataURL(qr);
         setLatestQRImg(latestQRImg);
@@ -55,6 +57,7 @@ export default async function initBaileys() {
         const timedOut =
           reason === DisconnectReason.timedOut ||
           reason === DisconnectReason.connectionClosed ||
+          reason === DisconnectReason.restartRequired ||
           reason === DisconnectReason.connectionLost;
 
         console.log(
