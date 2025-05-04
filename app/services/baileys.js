@@ -32,8 +32,8 @@ async function initBaileys() {
         const boomErr = /** @type {Boom | undefined} */ (lastDisconnect?.error);
         const shouldReconnect =
           boomErr?.output?.statusCode !== DisconnectReason.loggedOut;
-
-        console.log("connection closed. reconnect =", shouldReconnect);
+        const reason = lastDisconnect?.error?.output?.statusCode;
+        console.log("connection closed. reasson =", reason);
         if (shouldReconnect) {
           console.log("🕐 Reconectando socket…");
           let sock = await initBaileys(); // NO vuelvas a llamar createServer
@@ -54,17 +54,30 @@ async function initBaileys() {
 
   // forward every incoming text to n8n
   sock.ev.on("messages.upsert", async ({ messages }) => {
+    console.log("New message received:", messages);
+
     const msg = messages?.[0];
-    if (!msg?.key?.fromMe && msg.message?.conversation) {
+
+    if (
+      !msg?.key?.fromMe &&
+      (msg.message?.conversation || msg.message?.extendedTextMessage)
+    ) {
       try {
-        console.log(N8N_WEBHOOK_URL);
+        console.log(
+          "text:",
+          msg.message.conversation
+            ? msg.message.conversation
+            : msg.message?.extendedTextMessage?.text
+        );
 
         await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             from: msg.key.remoteJid,
-            text: msg.message.conversation,
+            text: msg.message.conversation
+              ? msg.message.conversation
+              : msg.message?.extendedTextMessage?.text,
           }),
         });
       } catch (err) {
