@@ -100,6 +100,7 @@ export default async function initBaileys() {
         msg.message.conversation ?? msg.message.extendedTextMessage?.text;
 
       console.log("📥 Texto recibido:", text);
+      console.log("N8N_WEBHOOK_URL:", N8N_WEBHOOK_URL);
 
       try {
         await fetch(N8N_WEBHOOK_URL, {
