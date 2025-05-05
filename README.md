@@ -42,6 +42,7 @@ Incoming messages are forwarded to `N8N_WEBHOOK_URL`. Incoming QR codes show for
 # montar un volumen en railway
 
 railway volume add -m /data
+railway volume list
 
 # run
 
