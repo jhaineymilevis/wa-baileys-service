@@ -47,3 +47,15 @@ railway volume list
 # run
 
 railway up
+
+## run local
+
+npom run dev
+
+## expose nggrock endpoint for test
+
+ngrok http 3000
+
+## kill all 300 port process runing
+
+lsof -i tcp:3000

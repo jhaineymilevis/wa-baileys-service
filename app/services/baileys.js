@@ -57,6 +57,7 @@ export default async function initBaileys() {
         const isLoggedOut = reason === DisconnectReason.loggedOut;
         const timedOut =
           reason === DisconnectReason.timedOut ||
+          reason === DisconnectReason.unavailableService ||
           reason === DisconnectReason.connectionClosed ||
           reason === DisconnectReason.restartRequired ||
           reason === DisconnectReason.connectionLost;
