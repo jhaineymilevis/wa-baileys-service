@@ -98,6 +98,10 @@ export default async function initBaileys() {
   sock.ev.on("messages.upsert", async ({ messages }) => {
     const msg = messages?.[0];
 
+    let quotedMessage =
+      msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
+        ?.conversation;
+
     let messageType = getMessageType(msg);
 
     let audioStream = null;
@@ -133,6 +137,7 @@ export default async function initBaileys() {
             messageType,
             text,
             audioStream,
+            quotedMessage,
           }),
         });
       } catch (err) {
