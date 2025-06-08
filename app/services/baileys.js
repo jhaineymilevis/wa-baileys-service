@@ -7,12 +7,14 @@ import {
   DisconnectReason,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-
+import { downloadMediaMessage } from "@whiskeysockets/baileys";
 import { setCurrentSocket, setLatestQRImg } from "../state.js";
 import { N8N_WEBHOOK_URL } from "../server.js";
 import waitForNetwork from "../utils/network.js";
 import getMessageType from "./messages.js";
-
+import MESSAGE_TYPES from "../consts/message-types.js";
+import FormData from "form-data";
+import fs from "fs";
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
 ——————————————————————————————— */
@@ -99,6 +101,7 @@ export default async function initBaileys() {
 
     let messageType = getMessageType(msg);
 
+    let audioStream = null;
     if (!msg?.key?.fromMe) {
       const text =
         msg.message.conversation && msg.message.conversation != ""
@@ -106,6 +109,25 @@ export default async function initBaileys() {
           : msg.message.extendedTextMessage?.text;
 
       const audioMessageUrl = msg.message?.audioMessage?.url;
+
+      if (messageType == MESSAGE_TYPES.AUDIO) {
+        // Step 1: Download and decrypt audio
+        const buffer = await downloadMediaMessage(
+          msg,
+          "buffer",
+          {},
+          { logger: console, reuploadRequest: sock.updateMediaMessage }
+        );
+
+        // S
+        // tep 2: Save to temporary file
+        const filePath = "./voice_note.ogg";
+        fs.writeFileSync(filePath, buffer);
+        console.log("✅ Audio decrypted and saved");
+
+        //  audioStream = fs.createReadStream(filePath);
+        audioStream = buffer; // Use buffer directly if you prefer
+      }
 
       console.log("📥 Texto recibido:", text);
       console.log("📥 Tipo de mensaje:", messageType);
@@ -117,7 +139,7 @@ export default async function initBaileys() {
             from: msg.key.remoteJid,
             messageType,
             text,
-            audioMessageUrl,
+            audioStream,
           }),
         });
       } catch (err) {
