@@ -11,6 +11,7 @@ import {
 import { setCurrentSocket, setLatestQRImg } from "../state.js";
 import { N8N_WEBHOOK_URL } from "../server.js";
 import waitForNetwork from "../utils/network.js";
+import getMessageType from "./messages.js";
 
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
@@ -94,23 +95,30 @@ export default async function initBaileys() {
   /* -------- MENSAJES ENTRANTES -------- */
   sock.ev.on("messages.upsert", async ({ messages }) => {
     const msg = messages?.[0];
-    if (
-      !msg?.key?.fromMe &&
-      (msg.message?.conversation || msg.message?.extendedTextMessage)
-    ) {
+    console.log(msg);
+
+    let messageType = getMessageType(msg);
+
+    if (!msg?.key?.fromMe) {
       const text =
         msg.message.conversation && msg.message.conversation != ""
           ? msg.message.conversation
           : msg.message.extendedTextMessage?.text;
 
-      console.log("📥 Texto recibido:", text);
-      console.log("N8N_WEBHOOK_URL:", N8N_WEBHOOK_URL);
+      const audioMessageUrl = msg.message?.audioMessage?.url;
 
+      console.log("📥 Texto recibido:", text);
+      console.log("📥 Tipo de mensaje:", messageType);
       try {
         await fetch(N8N_WEBHOOK_URL, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ from: msg.key.remoteJid, text }),
+          body: JSON.stringify({
+            from: msg.key.remoteJid,
+            messageType,
+            text,
+            audioMessageUrl,
+          }),
         });
       } catch (err) {
         console.error("Error enviando al webhook n8n:", err);
