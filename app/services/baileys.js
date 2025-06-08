@@ -116,15 +116,9 @@ export default async function initBaileys() {
           {},
           { logger: console, reuploadRequest: sock.updateMediaMessage }
         );
-
-        // S
-        // tep 2: Save to temporary file
-        const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
-        fs.writeFileSync(filePath, buffer);
-        console.log("✅ Audio decrypted and saved");
-        const formData = new FormData();
-        formData.append("file", fs.createReadStream(filePath));
-        audioStream = formData;
+        const bufferred = fs.readFileSync("./voice_note.ogg"); // Ya desencriptado
+        const base64 = bufferred.toString("base64");
+        audioStream = base64;
       }
 
       console.log("📥 Texto recibido:", text);
