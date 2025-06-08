@@ -108,8 +108,6 @@ export default async function initBaileys() {
           ? msg.message.conversation
           : msg.message.extendedTextMessage?.text;
 
-      const audioMessageUrl = msg.message?.audioMessage?.url;
-
       if (messageType == MESSAGE_TYPES.AUDIO) {
         // Step 1: Download and decrypt audio
         const buffer = await downloadMediaMessage(
@@ -125,8 +123,7 @@ export default async function initBaileys() {
         fs.writeFileSync(filePath, buffer);
         console.log("✅ Audio decrypted and saved");
 
-        //  audioStream = fs.createReadStream(filePath);
-        audioStream = buffer; // Use buffer directly if you prefer
+        audioStream = fs.createReadStream(filePath);
       }
 
       console.log("📥 Texto recibido:", text);
