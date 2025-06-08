@@ -115,9 +115,10 @@ export default async function initBaileys() {
           {},
           { logger: console, reuploadRequest: sock.updateMediaMessage }
         );
-        const bufferred = fs.readFileSync(
-          `/data/voice_note_${msg.messageTimestamp}.ogg`
-        ); // Ya desencriptado
+        const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
+        fs.writeFileSync(filePath, buffer);
+
+        const bufferred = fs.readFileSync(filePath); // Ya desencriptado
         const base64 = bufferred.toString("base64");
         audioStream = base64;
       }
