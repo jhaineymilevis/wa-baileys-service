@@ -122,8 +122,9 @@ export default async function initBaileys() {
         const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
         fs.writeFileSync(filePath, buffer);
         console.log("✅ Audio decrypted and saved");
-
-        audioStream = fs.createReadStream(filePath);
+        const formData = new FormData();
+        formData.append("file", fs.createReadStream(filePath));
+        audioStream = formData;
       }
 
       console.log("📥 Texto recibido:", text);
