@@ -97,7 +97,6 @@ export default async function initBaileys() {
   /* -------- MENSAJES ENTRANTES -------- */
   sock.ev.on("messages.upsert", async ({ messages }) => {
     const msg = messages?.[0];
-    console.log(msg);
 
     let messageType = getMessageType(msg);
 
@@ -116,12 +115,13 @@ export default async function initBaileys() {
           {},
           { logger: console, reuploadRequest: sock.updateMediaMessage }
         );
-        const bufferred = fs.readFileSync("./voice_note.ogg"); // Ya desencriptado
+        const bufferred = fs.readFileSync(
+          `./voice_note_${msg.messageTimestamp}.ogg`
+        ); // Ya desencriptado
         const base64 = bufferred.toString("base64");
         audioStream = base64;
       }
 
-      console.log("📥 Texto recibido:", text);
       console.log("📥 Tipo de mensaje:", messageType);
       try {
         await fetch(N8N_WEBHOOK_URL, {
