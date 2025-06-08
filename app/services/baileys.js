@@ -98,18 +98,25 @@ export default async function initBaileys() {
   sock.ev.on("messages.upsert", async ({ messages }) => {
     const msg = messages?.[0];
 
-    let quotedMessage =
-      msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
-        ?.conversation;
-
-    let messageType = getMessageType(msg);
-
     let audioStream = null;
     if (!msg?.key?.fromMe) {
-      const text =
+      let text =
         msg.message.conversation && msg.message.conversation != ""
           ? msg.message.conversation
           : msg.message.extendedTextMessage?.text;
+      let messageType = getMessageType(msg);
+
+      if (messageType == MESSAGE_TYPES.TEXT) {
+        let quotedMessage =
+          msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
+            ?.conversation;
+
+        if (quotedMessage) {
+          text = ` ${text}  \n\nCita: ${quotedMessage}`;
+        }
+      }
+
+      console.log(text);
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
         // Step 1: Download and decrypt audio
@@ -137,7 +144,6 @@ export default async function initBaileys() {
             messageType,
             text,
             audioStream,
-            quotedMessage,
           }),
         });
       } catch (err) {
