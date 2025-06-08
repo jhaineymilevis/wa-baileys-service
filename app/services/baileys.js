@@ -119,7 +119,7 @@ export default async function initBaileys() {
 
         // S
         // tep 2: Save to temporary file
-        const filePath = "./voice_note.ogg";
+        const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
         fs.writeFileSync(filePath, buffer);
         console.log("✅ Audio decrypted and saved");
 
