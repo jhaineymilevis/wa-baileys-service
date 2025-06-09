@@ -5,7 +5,7 @@ import MESSAGE_TYPES from "../consts/message-types.js";
  * @param {Object} message - The Baileys message object.
  * @returns {string} - The type of the message (e.g., "text", "image", "video", etc.).
  */
-function getMessageType(message) {
+export function getMessageType(message) {
   if (!message || typeof message !== "object") {
     throw new Error("Invalid message object");
   }
@@ -15,7 +15,7 @@ function getMessageType(message) {
   if (messageKeys.includes("conversation")) {
     return MESSAGE_TYPES.TEXT;
   } else if (messageKeys.includes("extendedTextMessage")) {
-    return MESSAGE_TYPES.TEXT;
+    return MESSAGE_TYPES.TEXT_EXTENDED;
   } else if (messageKeys.includes("audioMessage")) {
     return MESSAGE_TYPES.AUDIO;
   } else if (messageKeys.includes("imageMessage")) {
@@ -38,4 +38,22 @@ function getMessageType(message) {
   return messageKeys.length > 0 ? messageKeys[0] : "unknown";
 }
 
-export default getMessageType;
+export function getQuotedMessageText(message) {
+  let text = undefined;
+
+  console.log("📥 Obteniendo texto de mensaje citado:", message);
+
+  if (message?.conversation) {
+    text = message.conversation;
+  } else if (message?.extendedTextMessage?.text) {
+    text = message.extendedTextMessage.text;
+  } else if (message?.imageMessage?.caption) {
+    text = message.imageMessage.caption;
+  } else if (message?.videoMessage?.caption) {
+    text = message.videoMessage.caption;
+  } else if (message?.documentMessage?.fileName) {
+    text = message.documentMessage.fileName;
+  }
+
+  return text;
+}

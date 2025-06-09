@@ -1,5 +1,6 @@
 const MESSAGE_TYPES = {
   TEXT: "text",
+  TEXT_EXTENDED: "text_extended",
   IMAGE: "image",
   VIDEO: "video",
   AUDIO: "audio",

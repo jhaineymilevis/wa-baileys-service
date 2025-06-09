@@ -11,10 +11,11 @@ import { downloadMediaMessage } from "@whiskeysockets/baileys";
 import { setCurrentSocket, setLatestQRImg } from "../state.js";
 import { N8N_WEBHOOK_URL } from "../server.js";
 import waitForNetwork from "../utils/network.js";
-import getMessageType from "./messages.js";
+import { getQuotedMessageText, getMessageType } from "./messages.js";
 import MESSAGE_TYPES from "../consts/message-types.js";
-import FormData from "form-data";
+
 import fs from "fs";
+import { log } from "console";
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
 ——————————————————————————————— */
@@ -106,17 +107,16 @@ export default async function initBaileys() {
           : msg.message.extendedTextMessage?.text;
       let messageType = getMessageType(msg);
 
-      if (messageType == MESSAGE_TYPES.TEXT) {
+      if (messageType == MESSAGE_TYPES.TEXT_EXTENDED) {
         let quotedMessage =
-          msg.message?.extendedTextMessage?.contextInfo?.quotedMessage
-            ?.conversation;
+          msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
-        if (quotedMessage) {
-          text = ` ${text}  \n\nCita: ${quotedMessage}`;
-        }
+        let quotedMessageText = getQuotedMessageText(quotedMessage);
+
+        text = ` ${text}  \n\nCita: ${quotedMessageText}`;
+
+        console.log("Texto extendido:", text);
       }
-
-      console.log(text);
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
         // Step 1: Download and decrypt audio
