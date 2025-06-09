@@ -41,8 +41,6 @@ export function getMessageType(message) {
 export function getQuotedMessageText(message) {
   let text = undefined;
 
-  console.log("📥 Obteniendo texto de mensaje citado:", message);
-
   if (message?.conversation) {
     text = message.conversation;
   } else if (message?.extendedTextMessage?.text) {

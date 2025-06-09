@@ -114,8 +114,6 @@ export default async function initBaileys() {
         let quotedMessageText = getQuotedMessageText(quotedMessage);
 
         text = ` ${text}  \n\nCita: ${quotedMessageText}`;
-
-        console.log("Texto extendido:", text);
       }
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
