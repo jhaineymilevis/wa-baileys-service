@@ -16,6 +16,7 @@ import MESSAGE_TYPES from "../consts/message-types.js";
 
 import fs from "fs";
 import { log } from "console";
+import { convertFileToBase64 } from "../utils/files.js";
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
 ——————————————————————————————— */
@@ -100,11 +101,13 @@ export default async function initBaileys() {
     const msg = messages?.[0];
 
     let audioStream = null;
+    let base64DataUri = null;
     if (!msg?.key?.fromMe && msg.key.remoteJid != "status@broadcast") {
       let text =
         msg.message.conversation && msg.message.conversation != ""
           ? msg.message.conversation
           : msg.message.extendedTextMessage?.text;
+
       let messageType = getMessageType(msg);
 
       if (messageType == MESSAGE_TYPES.TEXT_EXTENDED) {
@@ -117,19 +120,11 @@ export default async function initBaileys() {
       }
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
-        // Step 1: Download and decrypt audio
-        const buffer = await downloadMediaMessage(
-          msg,
-          "buffer",
-          {},
-          { logger: console, reuploadRequest: sock.updateMediaMessage }
-        );
-        const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
-        fs.writeFileSync(filePath, buffer);
+        audioStream = await getAudioStream(msg);
+      }
 
-        const bufferred = fs.readFileSync(filePath); // Ya desencriptado
-        const base64 = bufferred.toString("base64");
-        audioStream = base64;
+      if (messageType == MESSAGE_TYPES.IMAGE) {
+        base64DataUri = await getImageStream(msg);
       }
 
       console.log("📥 Tipo de mensaje:", messageType);
@@ -142,6 +137,7 @@ export default async function initBaileys() {
             messageType,
             text,
             audioStream,
+            base64DataUri,
           }),
         });
       } catch (err) {
@@ -156,4 +152,38 @@ export default async function initBaileys() {
   process.once("SIGTERM", closeSocket);
 
   return sock;
+}
+
+async function getAudioStream(msg) {
+  // Step 1: Download and decrypt audio
+  const buffer = await downloadMediaMessage(
+    msg,
+    "buffer",
+    {},
+    { logger: console, reuploadRequest: sock.updateMediaMessage }
+  );
+  const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
+
+  let audioStream = await convertFileToBase64(filePath, buffer);
+
+  return audioStream;
+}
+
+async function getImageStream(msg) {
+  const buffer = await downloadMediaMessage(
+    msg,
+    "buffer",
+    {},
+    { logger: console, reuploadRequest: sock.updateMediaMessage }
+  );
+
+  const filePath = `./image_${msg.messageTimestamp}.jpg`;
+
+  const base64Image = convertFileToBase64(filePath, buffer);
+
+  const mimeType = "image/jpeg"; // o detectarlo con alguna librería si varía
+
+  let base64DataUri = `data:${mimeType};base64,${base64Image}`;
+
+  return base64DataUri;
 }
