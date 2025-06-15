@@ -100,7 +100,7 @@ export default async function initBaileys() {
     const msg = messages?.[0];
 
     let audioStream = null;
-    if (!msg?.key?.fromMe) {
+    if (!msg?.key?.fromMe && msg.key.remoteJid != "status@broadcast") {
       let text =
         msg.message.conversation && msg.message.conversation != ""
           ? msg.message.conversation
