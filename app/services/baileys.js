@@ -14,8 +14,6 @@ import waitForNetwork from "../utils/network.js";
 import { getQuotedMessageText, getMessageType } from "./messages.js";
 import MESSAGE_TYPES from "../consts/message-types.js";
 
-import fs from "fs";
-import { log } from "console";
 import { convertFileToBase64 } from "../utils/files.js";
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
