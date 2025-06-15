@@ -120,11 +120,11 @@ export default async function initBaileys() {
       }
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
-        audioStream = await getAudioStream(msg);
+        audioStream = await getAudioStream(msg, sock);
       }
 
       if (messageType == MESSAGE_TYPES.IMAGE) {
-        base64DataUri = await getImageStream(msg);
+        base64DataUri = await getImageStream(msg, sock);
       }
 
       console.log("📥 Tipo de mensaje:", messageType);
@@ -154,7 +154,7 @@ export default async function initBaileys() {
   return sock;
 }
 
-async function getAudioStream(msg) {
+async function getAudioStream(msg, sock) {
   // Step 1: Download and decrypt audio
   const buffer = await downloadMediaMessage(
     msg,
@@ -169,7 +169,7 @@ async function getAudioStream(msg) {
   return audioStream;
 }
 
-async function getImageStream(msg) {
+async function getImageStream(msg, sock) {
   const buffer = await downloadMediaMessage(
     msg,
     "buffer",
