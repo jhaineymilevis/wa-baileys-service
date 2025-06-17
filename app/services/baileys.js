@@ -123,6 +123,10 @@ export default async function initBaileys() {
 
       if (messageType == MESSAGE_TYPES.IMAGE) {
         base64DataUri = await getImageStream(msg, sock);
+
+        text = ` ${text}  \n\nCita: ${
+          msg.message?.imageMessage?.caption || ""
+        }`;
       }
 
       console.log("📥 Tipo de mensaje:", messageType);
