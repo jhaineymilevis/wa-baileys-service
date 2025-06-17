@@ -114,7 +114,7 @@ export default async function initBaileys() {
 
         let quotedMessageText = getQuotedMessageText(quotedMessage);
 
-        text = ` ${text}  \n\nCita: ${quotedMessageText}`;
+        text = ` ${text}. Cita: ${quotedMessageText}`;
       }
 
       if (messageType == MESSAGE_TYPES.AUDIO) {
@@ -124,7 +124,7 @@ export default async function initBaileys() {
       if (messageType == MESSAGE_TYPES.IMAGE) {
         base64DataUri = await getImageStream(msg, sock);
 
-        text = `\n\nCaption: ${msg.message?.imageMessage?.caption || ""}`;
+        text = `Caption: ${msg.message?.imageMessage?.caption || ""}`;
       }
 
       console.log("📥 Tipo de mensaje:", messageType);
