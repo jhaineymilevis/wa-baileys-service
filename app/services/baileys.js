@@ -177,7 +177,7 @@ async function getImageStream(msg, sock) {
 
   const filePath = `./image_${msg.messageTimestamp}.jpg`;
 
-  const base64Image = convertFileToBase64(filePath, buffer);
+  const base64Image = await convertFileToBase64(filePath, buffer);
 
   const mimeType = "image/jpeg"; // o detectarlo con alguna librería si varía
 
