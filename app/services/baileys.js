@@ -124,7 +124,7 @@ export default async function initBaileys() {
       if (messageType == MESSAGE_TYPES.IMAGE) {
         base64DataUri = await getImageStream(msg, sock);
 
-        text = ` ${text}  \n\nCita: ${
+        text = ` ${text}  \n\nCaption: ${
           msg.message?.imageMessage?.caption || ""
         }`;
       }
