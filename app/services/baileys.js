@@ -7,14 +7,13 @@ import {
   DisconnectReason,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-import { downloadMediaMessage } from "@whiskeysockets/baileys";
+
 import { setCurrentSocket, setLatestQRImg } from "../state.js";
 import { N8N_WEBHOOK_URL } from "../server.js";
 import waitForNetwork from "../utils/network.js";
 import { getQuotedMessageText, getMessageType } from "./messages.js";
 import MESSAGE_TYPES from "../consts/message-types.js";
 
-import { convertFileToBase64 } from "../utils/files.js";
 import { getAudioStream } from "../utils/audio.js";
 import { getImageStream } from "../utils/image.js";
 /* ————————————————————————————————

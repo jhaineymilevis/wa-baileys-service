@@ -1,3 +1,5 @@
+import { downloadMediaMessage } from "@whiskeysockets/baileys";
+
 export async function getAudioStream(msg, sock) {
   // Step 1: Download and decrypt audio
   const buffer = await downloadMediaMessage(

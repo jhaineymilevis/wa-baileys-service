@@ -1,3 +1,5 @@
+import { downloadMediaMessage } from "@whiskeysockets/baileys";
+
 export async function getImageStream(msg, sock) {
   const buffer = await downloadMediaMessage(
     msg,
