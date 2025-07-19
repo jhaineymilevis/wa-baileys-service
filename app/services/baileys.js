@@ -15,6 +15,8 @@ import { getQuotedMessageText, getMessageType } from "./messages.js";
 import MESSAGE_TYPES from "../consts/message-types.js";
 
 import { convertFileToBase64 } from "../utils/files.js";
+import { getAudioStream } from "../utils/audio.js";
+import { getImageStream } from "../utils/image.js";
 /* ————————————————————————————————
    AJUSTES RE‑INTENTOS
 ——————————————————————————————— */
@@ -152,38 +154,4 @@ export default async function initBaileys() {
   process.once("SIGTERM", closeSocket);
 
   return sock;
-}
-
-async function getAudioStream(msg, sock) {
-  // Step 1: Download and decrypt audio
-  const buffer = await downloadMediaMessage(
-    msg,
-    "buffer",
-    {},
-    { logger: console, reuploadRequest: sock.updateMediaMessage }
-  );
-  const filePath = `./voice_note_${msg.messageTimestamp}.ogg`;
-
-  let audioStream = await convertFileToBase64(filePath, buffer);
-
-  return audioStream;
-}
-
-async function getImageStream(msg, sock) {
-  const buffer = await downloadMediaMessage(
-    msg,
-    "buffer",
-    {},
-    { logger: console, reuploadRequest: sock.updateMediaMessage }
-  );
-
-  const filePath = `./image_${msg.messageTimestamp}.jpg`;
-
-  const base64Image = await convertFileToBase64(filePath, buffer);
-
-  const mimeType = "image/jpeg"; // o detectarlo con alguna librería si varía
-
-  let base64DataUri = `data:${mimeType};base64,${base64Image}`;
-
-  return base64DataUri;
 }

@@ -25,7 +25,7 @@ async function sendMessage(req, res) {
 
     setTimeout(() => {
       sock.sendPresenceUpdate("paused", jid); // ③ detiene la animación
-    }, 2000);
+    }, 5000);
 
     await sock.sendMessage(jid, message);
     res.json({ status: "sent" });
