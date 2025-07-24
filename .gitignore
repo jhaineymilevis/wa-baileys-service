@@ -5,3 +5,5 @@ auth
 auth/*
 data
 data/*
+auth/*
+auth
